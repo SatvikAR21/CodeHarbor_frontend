@@ -1,21 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import axios from "axios";
 import { useAuth } from "../../authContext.jsx";
 
-import { PageHeader } from "@primer/react";
-import { Box, Button } from "@primer/react";
+import { PageHeader, Box, Button } from "@primer/react";
 import "./auth.css";
 
 import logo from "../../assets/github-mark-white.svg";
 import { Link } from "react-router-dom";
 
 const Login = () => {
-  // useEffect(() => {
-  //   localStorage.removeItem("token");
-  //   localStorage.removeItem("userId");
-  //   setCurrentUser(null);
-  // });
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -26,10 +19,15 @@ const Login = () => {
 
     try {
       setLoading(true);
-      const res = await axios.post("http://localhost:3002/login", {
-        email: email,
-        password: password,
-      });
+
+      // ✅ Use backend URL from .env
+      const res = await axios.post(
+        `${import.meta.env.VITE_API_URL}/login`,
+        {
+          email,
+          password,
+        }
+      );
 
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("userId", res.data.userId);
@@ -61,6 +59,7 @@ const Login = () => {
             </PageHeader>
           </Box>
         </div>
+
         <div className="login-box">
           <div>
             <label className="label">Email address</label>
@@ -74,6 +73,7 @@ const Login = () => {
               onChange={(e) => setEmail(e.target.value)}
             />
           </div>
+
           <div className="div">
             <label className="label">Password</label>
             <input
@@ -96,6 +96,7 @@ const Login = () => {
             {loading ? "Loading..." : "Login"}
           </Button>
         </div>
+
         <div className="pass-box">
           <p>
             New to GitHub? <Link to="/signup">Create an account</Link>
