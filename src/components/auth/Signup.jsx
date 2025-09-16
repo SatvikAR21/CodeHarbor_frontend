@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import { useAuth } from "../../authContext";
 
-import { PageHeader, Box, Button } from "@primer/react"; // ✅ FIXED
+import { PageHeader, Box, Button } from "@primer/react";
 import "./auth.css";
 
 import logo from "../../assets/github-mark-white.svg";
@@ -21,11 +21,16 @@ const Signup = () => {
 
     try {
       setLoading(true);
-      const res = await axios.post("http://localhost:3002/signup", {
-        email: email,
-        password: password,
-        username: username,
-      });
+
+      // ✅ Use backend URL from .env
+      const res = await axios.post(
+        `${import.meta.env.VITE_API_URL}/signup`,
+        {
+          email,
+          password,
+          username,
+        }
+      );
 
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("userId", res.data.userId);
