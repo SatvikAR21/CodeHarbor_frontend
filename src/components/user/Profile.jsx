@@ -19,9 +19,8 @@ const Profile = () => {
 
       if (userId) {
         try {
-          const response = await axios.get(
-            `http://localhost:3002/userProfile/${userId}`
-          );
+          const response = await fetch(`${import.meta.env.VITE_API_URL}/repo/user/${userId}`);
+
           setUserDetails(response.data);
         } catch (err) {
           console.error("Cannot fetch user details: ", err);
