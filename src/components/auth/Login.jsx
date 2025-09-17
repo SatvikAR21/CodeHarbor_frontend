@@ -20,25 +20,33 @@ const Login = () => {
     try {
       setLoading(true);
 
-      // ✅ Use backend URL from .env
+      // ✅ Match backend route (update if yours is different)
       const res = await axios.post(
-        `${import.meta.env.VITE_API_URL}/login`,
+        `${import.meta.env.VITE_API_URL}/api/auth/login`,
         {
           email,
           password,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
         }
       );
 
-      localStorage.setItem("token", res.data.token);
-      localStorage.setItem("userId", res.data.userId);
+      if (res.data?.token) {
+        localStorage.setItem("token", res.data.token);
+        localStorage.setItem("userId", res.data.userId);
 
-      setCurrentUser(res.data.userId);
-      setLoading(false);
-
-      window.location.href = "/";
+        setCurrentUser(res.data.userId);
+        window.location.href = "/";
+      } else {
+        alert("Login failed: No token received.");
+      }
     } catch (err) {
-      console.error(err);
-      alert("Login Failed!");
+      console.error("Login error:", err.response?.data || err.message);
+      alert(`Login failed: ${err.response?.data?.message || "Server error"}`);
+    } finally {
       setLoading(false);
     }
   };
@@ -60,7 +68,7 @@ const Login = () => {
           </Box>
         </div>
 
-        <div className="login-box">
+        <form className="login-box" onSubmit={handleLogin}>
           <div>
             <label className="label">Email address</label>
             <input
@@ -71,6 +79,7 @@ const Login = () => {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              required
             />
           </div>
 
@@ -84,18 +93,19 @@ const Login = () => {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              required
             />
           </div>
 
           <Button
+            type="submit"
             variant="primary"
             className="login-btn"
             disabled={loading}
-            onClick={handleLogin}
           >
             {loading ? "Loading..." : "Login"}
           </Button>
-        </div>
+        </form>
 
         <div className="pass-box">
           <p>
