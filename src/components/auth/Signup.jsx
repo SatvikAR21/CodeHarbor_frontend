@@ -22,26 +22,34 @@ const Signup = () => {
     try {
       setLoading(true);
 
-      // ✅ Use backend URL from .env
+      // ✅ Backend URL from .env
       const res = await axios.post(
-        `${import.meta.env.VITE_API_URL}/signup`,
+        `${import.meta.env.VITE_API_URL}/api/auth/signup`, // make sure this matches your backend route
         {
+          username,
           email,
           password,
-          username,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
         }
       );
 
-      localStorage.setItem("token", res.data.token);
-      localStorage.setItem("userId", res.data.userId);
+      if (res.data?.token) {
+        localStorage.setItem("token", res.data.token);
+        localStorage.setItem("userId", res.data.userId);
 
-      setCurrentUser(res.data.userId);
-      setLoading(false);
-
-      window.location.href = "/";
+        setCurrentUser(res.data.userId);
+        window.location.href = "/";
+      } else {
+        alert("Signup failed: No token received.");
+      }
     } catch (err) {
-      console.error(err);
-      alert("Signup Failed!");
+      console.error("Signup error:", err.response?.data || err.message);
+      alert(`Signup failed: ${err.response?.data?.message || "Server error"}`);
+    } finally {
       setLoading(false);
     }
   };
@@ -63,7 +71,7 @@ const Signup = () => {
           </Box>
         </div>
 
-        <div className="login-box">
+        <form className="login-box" onSubmit={handleSignup}>
           <div>
             <label className="label">Username</label>
             <input
@@ -74,6 +82,7 @@ const Signup = () => {
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
+              required
             />
           </div>
 
@@ -87,6 +96,7 @@ const Signup = () => {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              required
             />
           </div>
 
@@ -100,18 +110,19 @@ const Signup = () => {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              required
             />
           </div>
 
           <Button
+            type="submit"
             variant="primary"
             className="login-btn"
             disabled={loading}
-            onClick={handleSignup}
           >
             {loading ? "Loading..." : "Signup"}
           </Button>
-        </div>
+        </form>
 
         <div className="pass-box">
           <p>
