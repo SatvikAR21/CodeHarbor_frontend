@@ -14,32 +14,41 @@ const Dashboard = () => {
     const fetchRepositories = async () => {
       try {
         const response = await fetch(
-          `http://localhost:3002/repo/user/${userId}`
+          `${import.meta.env.VITE_API_URL}/repo/user/${userId}`
         );
+        if (!response.ok) {
+          throw new Error("Failed to fetch repositories");
+        }
         const data = await response.json();
-        setRepositories(data.repositories);
+        setRepositories(data.repositories || []);
       } catch (err) {
-        console.error("Error while fecthing repositories: ", err);
+        console.error("Error while fetching repositories:", err);
       }
     };
 
     const fetchSuggestedRepositories = async () => {
       try {
-        const response = await fetch(`http://localhost:3002/repo/all`);
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/repo/all`
+        );
+        if (!response.ok) {
+          throw new Error("Failed to fetch suggested repositories");
+        }
         const data = await response.json();
-        setSuggestedRepositories(data);
-        console.log(suggestedRepositories);
+        setSuggestedRepositories(data || []);
       } catch (err) {
-        console.error("Error while fecthing repositories: ", err);
+        console.error("Error while fetching suggested repositories:", err);
       }
     };
 
-    fetchRepositories();
+    if (userId) {
+      fetchRepositories();
+    }
     fetchSuggestedRepositories();
   }, []);
 
   useEffect(() => {
-    if (searchQuery == "") {
+    if (searchQuery === "") {
       setSearchResults(repositories);
     } else {
       const filteredRepo = repositories.filter((repo) =>
@@ -53,17 +62,22 @@ const Dashboard = () => {
     <>
       <Navbar />
       <section id="dashboard">
+        {/* Suggested Repositories */}
         <aside>
           <h3>Suggested Repositories</h3>
-          {suggestedRepositories.map((repo) => {
-            return (
-              <div key={repo._id}>
+          {suggestedRepositories.length > 0 ? (
+            suggestedRepositories.map((repo) => (
+              <div key={repo._id} className="repo-card">
                 <h4>{repo.name}</h4>
-                <h4>{repo.description}</h4>
+                <p>{repo.description}</p>
               </div>
-            );
-          })}
+            ))
+          ) : (
+            <p>No suggestions available</p>
+          )}
         </aside>
+
+        {/* User Repositories */}
         <main>
           <h2>Your Repositories</h2>
           <div id="search">
@@ -74,15 +88,19 @@ const Dashboard = () => {
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-          {searchResults.map((repo) => {
-            return (
-              <div key={repo._id}>
+          {searchResults.length > 0 ? (
+            searchResults.map((repo) => (
+              <div key={repo._id} className="repo-card">
                 <h4>{repo.name}</h4>
-                <h4>{repo.description}</h4>
+                <p>{repo.description}</p>
               </div>
-            );
-          })}
+            ))
+          ) : (
+            <p>No repositories found</p>
+          )}
         </main>
+
+        {/* Upcoming Events */}
         <aside>
           <h3>Upcoming Events</h3>
           <ul>
